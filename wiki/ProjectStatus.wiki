@@ -1,3 +1,3 @@
-I am currently working on MobileChess and should have an alpha release soon. I am looking for ObjC coders with UIKit experience though since I am new to this language.
+I am currently working on MobileChess and should have an alpha release soon.
 
 gnuchess builds and runs fine on the iPhone and seems to run fast enough to play a reasonable blitz game. Things get pretty slow with depth set to anything over 6 though and the hashsize has to be relatively small to fit in to available memory.
