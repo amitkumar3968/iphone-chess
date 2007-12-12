@@ -1,0 +1,10 @@
+/Users/alexs/code/iphone/MobileChess/ChessView.m: In function '-[ChessView initWithFrame:]':
+/Users/alexs/code/iphone/MobileChess/ChessView.m:24: warning: no '-initWithRect:Dimension:' method found
+/Users/alexs/code/iphone/MobileChess/ChessView.m:24: warning: (Messages without a matching method signature
+/Users/alexs/code/iphone/MobileChess/ChessView.m:24: warning: will be assumed to return 'id' and accept
+/Users/alexs/code/iphone/MobileChess/ChessView.m:24: warning: '...' as arguments.)
+/Users/alexs/code/iphone/MobileChess/ChessView.m: At top level:
+/Users/alexs/code/iphone/MobileChess/ChessView.m:86: error: syntax error before 'ZBOthelloBoard'
+/Users/alexs/code/iphone/MobileChess/ChessView.m:92: warning: incomplete implementation of class 'ChessView'
+/Users/alexs/code/iphone/MobileChess/ChessView.m:92: warning: method definition for '-board' not found
+/Users/alexs/code/iphone/MobileChess/ChessView.m:92: warning: method definition for '-renderCell:' not found
