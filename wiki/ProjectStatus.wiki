@@ -1,3 +1,5 @@
-I am currently working on MobileChess and should have an alpha release soon.
+First playable version is up for download. It mostly works. Your game state is saved across reloads, however gnuchess doesnt get updated with the board data on load yet. So don't quit ;) If things start going crazy, echo -n > /Applications/Chess.app/board.tmp to reset the board state.
 
-gnuchess builds and runs fine on the iPhone and seems to run fast enough to play a reasonable blitz game. Things get pretty slow with depth set to anything over 6 though and the hashsize has to be relatively small to fit in to available memory.
+The menus don't work, I want to get them working so you can start a new game, configure gnuchess a bit etc once the game persistence is fixed.
+
+I think the general game mechanics should work fairly reliably, although I think castling may cause some crazy stuff to happen at times, keep an eye out :) I'd love to get any feedback about this, it's my first Obj-C app, let alone for the iPhone. E-mail me at alex.stapleton@gmail.com with any questions, complaints, patches etc ;)
