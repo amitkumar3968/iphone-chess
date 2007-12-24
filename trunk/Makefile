@@ -20,8 +20,9 @@ IP=10.0.1.3
 SRC=src/
 IMG=img/
 SOUND=sound/
+CHESS=gnuchess-5.07/
 
-all:	Chess bundle
+all:	Chess gnuchess bundle zip
 
 Chess:  main.o Chess.o ChessEngine.o ChessView.o ChessBoard.o ChessController.o ChessCell.o ChessPiece.o ChessPiece_View.o SubProcess.o ChessAudio.o
 	$(LD) $(LDFLAGS) -o $@ $^
@@ -31,22 +32,32 @@ Chess:  main.o Chess.o ChessEngine.o ChessView.o ChessBoard.o ChessController.o 
 
 bundle: Chess
 	mkdir -p Chess.app
+	mkdir -p Chess.app/pieces
+	mkdir -p Chess.app/sound
+
 	echo -n > Chess.app/gnuchess.pid
 	echo -n > Chess.app/board.tmp
+
 	cp Chess Chess.app
-	cp -R $(IMG)* Chess.app
-	cp -R $(SOUND)* Chess.app
-	cp gnuchess Chess.app
+	cp $(CHESS)/src/gnuchess Chess.app
 	cp Info.plist Chess.app
 
+	tar --exclude '*/.*' -C img/ -c . | tar -C Chess.app -x
+	tar --exclude '*/.*' -c sound/ | tar -C Chess.app -x
+
+	
 deploy:
-	make bundle
 	scp -rp Chess.app root@$(IP):/Applications
 
 zip: bundle
 	zip -9yr Chess.zip Chess.app
 
+gnuchess:
+	cd $(CHESS) && ./configure --host=arm && make
+
 clean:
 	rm -f *.o Chess Chess.zip
 	rm -Rf Chess.app
 
+	cd $(CHESS) && make clean
+	rm -Rf $(SRC)/.deps/
