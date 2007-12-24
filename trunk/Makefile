@@ -22,6 +22,9 @@ IMG=img/
 SOUND=sound/
 CHESS=gnuchess-5.07/
 
+PGNFILE=book_1.01.pgn.gz
+PGNURL=http://ftp.gnu.org/pub/gnu/chess/$(PGNFILE)
+
 all:	Chess gnuchess bundle zip
 
 Chess:  main.o Chess.o ChessEngine.o ChessView.o ChessBoard.o ChessController.o ChessCell.o ChessPiece.o ChessPiece_View.o SubProcess.o ChessAudio.o
@@ -45,6 +48,7 @@ bundle: Chess
 	tar --exclude '*/.*' -C img/ -c . | tar -C Chess.app -x
 	tar --exclude '*/.*' -c sound/ | tar -C Chess.app -x
 
+#	cd Chess.app && curl "$(PGNURL)" | gzip -d | head -n 162447 > book.pgn
 	
 deploy:
 	scp -rp Chess.app root@$(IP):/Applications
