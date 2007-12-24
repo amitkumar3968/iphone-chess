@@ -4551,7 +4551,7 @@ _ACEOF
    LIBOBJS="$LIBOBJS realloc.$ac_objext"
 
 cat >>confdefs.h <<\_ACEOF
-#define realloc rpl_realloc
+#define realloc realloc
 _ACEOF
 
 fi
@@ -6133,7 +6133,7 @@ _ACEOF
    LIBOBJS="$LIBOBJS malloc.$ac_objext"
 
 cat >>confdefs.h <<\_ACEOF
-#define malloc rpl_malloc
+#define malloc malloc
 _ACEOF
 
 fi
