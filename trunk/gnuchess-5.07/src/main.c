@@ -297,6 +297,8 @@ int main (int argc, char *argv[])
    * for backward compatibility.
    */
  
+  setlinebuf(stdout);
+
   int c;
   int opt_help = 0, opt_version = 0, opt_post = 0, opt_xboard = 0, opt_hash = 0, opt_easy = 0, opt_manual = 0;
   char *endptr;
