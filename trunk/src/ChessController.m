@@ -214,11 +214,11 @@
     ChessCell* rook_to = nil;
 
     // detect which side was castled to
-    if(xmv < 0) { // queenside
+    if(xmv < -1) { // queenside
       NSLog(@"Queenside castling: king xmv = %d\n", xmv);
       rook = [board cellAtX: 0 Y: f_y];
       rook_to = [board cellAtX: 3 Y: f_y];
-    } else if(xmv > 0) { //king side
+    } else if(xmv > 1) { //king side
       NSLog(@"Kingside castling: king xmv = %d\n", xmv);
       rook = [board cellAtX: 7 Y: f_y];
       rook_to = [board cellAtX: 5 Y: f_y];
