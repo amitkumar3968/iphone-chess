@@ -57,7 +57,8 @@ zip: bundle
 	zip -9yr Chess.zip Chess.app
 
 gnuchess:
-	cd $(CHESS) && ./configure --host=arm && make
+	cd $(CHESS) && CC=$(CC)./configure --host=arm && make
+	
 
 clean:
 	rm -f *.o Chess Chess.zip
