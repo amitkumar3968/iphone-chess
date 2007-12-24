@@ -18,12 +18,16 @@
 -(void)newGame;
 -(void)go;
 -(void)quit;
--(void)setDepth:(int)d;
--(void)setClock:(float)c;
--(void)setHashsize:(int)h;
 -(void)moveNow;
 -(void)hint;
--(void)draw;
+
+-(void)setDepth:(int)d;
+-(void)setClock:(float)c;
+-(void)setBook:(NSString*)book;
+-(void)setHashsize:(int)h;
+
+
+
 
 
 @end

@@ -22,6 +22,9 @@
   char t_x = 'a' + [t x];
 
   NSString* move = [[NSString alloc] initWithFormat:@"%c%c%c%c\n", f_x, f_y, t_x, t_y];
+
+  NSLog(@"Sending move to gnuchess: %@\n", move);
+
   if(last_move) {
     [last_move release];
   }
@@ -82,6 +85,7 @@
 {
   [self setDepth: 4];
   [self setClock: 30*50];
+  //  [self setBook: @"book.pgn"];
   [self setHashsize: pow(2, 16)];
 }
 
@@ -143,6 +147,13 @@
 -(void)quit
 {
   [proc writeString:@"quit\n"];
+}
+
+-(void)setBook:(NSString*)book
+{
+  NSString* sb = [[NSString alloc] initWithFormat:@"book add %@\n", book];
+  [proc writeString: sb];
+  [sb release];
 }
 
 -(void)setDepth:(int)d
