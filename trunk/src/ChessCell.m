@@ -24,6 +24,14 @@
     return self;
 }
 
+- (NSString*)stringCoord
+{
+  char f_y = '1' + [self y];
+  char f_x = 'a' + [self x];
+
+  return [NSString stringWithFormat:@"%c%c", f_x, f_y];
+}
+
 - (ChessPiece*)piece
 {
     return [piece_view piece];

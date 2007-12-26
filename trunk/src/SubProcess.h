@@ -14,13 +14,14 @@
 }
 
 // Delegate should support InputDelegateProtocol
-- (id)initWithDelegate:(id)inputDelegate;
+- (id)init;
 - (void)dealloc;
 - (void)close;
 - (BOOL)isRunning;
+- (int)readPidFile;
+- (void)writePidFile;
+
 - (int)write:(const char*)c length:(unsigned int)len; 
 - (int)writeString:(NSString*)string;
-- (void)startIOThread:(id)inputDelegate;
-- (void)failure:(NSString*)message;
-
+- (NSString*)readLine;
 @end

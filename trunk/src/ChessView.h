@@ -26,8 +26,8 @@
 
 - (void)mouseDown:(GSEvent *)event;
 
-- (void)startWaiting;
-- (void)stopWaiting;
+- (void)startWaiting:(id)unused;
+- (void)stopWaiting:(id)unused;
 
 - (void)renderCell:(ChessCell *)cell;
 

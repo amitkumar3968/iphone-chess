@@ -14,6 +14,19 @@
 #import "ChessEngine.h"
 #import "ChessAudio.h"
 
+@interface ChessMove : NSObject {
+  ChessCell* from;
+  ChessCell* to;
+}
+
+- (id)initFrom:(ChessCell*)f To:(ChessCell*)t;
+- (id)initFromString:(NSString*)move onBoard:(ChessBoard*)board;
+- (void)dealloc;
+- (ChessCell*)from;
+- (ChessCell*)to;
+
+@end
+
 @interface ChessController : NSObject {
   ChessAudio* audio;
   ChessBoard* board;
@@ -23,30 +36,44 @@
 
   BOOL waiting;
   ChessEngine* engine;
+
   NSString* turn_color; // whose turn is it?
   NSString* player_color;
+
+  int turn_num;
+  int moves_sent;
+  int moves_recv;
+
   NSMutableArray* white_taken; // pieces taken which are white
   NSMutableArray* black_taken; // pieces taken which are black
-  NSMutableArray* move_history;
 }
 
 - (void)startGame;
-- (void)newGame;
+- (void)newGameWithHumanAs:(NSString*)color;
 - (id)initWithBoard:(ChessBoard*)b inView:(UIView*)v;
 - (void)cellClicked:(ChessCell*)cell inView:(UIView*)view;
-- (ChessCell*)selected_cell;
+
+- (void)movePiece:(ChessMove*)move;
 
 - (void)toggleTurn;
 - (BOOL)isComputerTurn;
 - (BOOL)isHumanTurn;
 
+- (void)engineThread:(id)unused;
+
+- (void)sendMove:(NSString*)move;
+
 - (void)engineMove:(NSString*)move;
 - (void)illegalMove:(NSString*)move;
 - (void)validMove:(NSString*)move;
-- (void)doMove:(NSString*)move;
-- (ChessEngine*)engine;
 
+- (void)startManual;
+- (void)stopManual;
 
 - (void)startWaiting;
 - (void)stopWaiting;
+
+- (ChessEngine*)engine;
+- (ChessCell*)selected_cell;
+- (NSArray*)move_history;
 @end

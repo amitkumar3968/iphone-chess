@@ -15,14 +15,10 @@
   [_window _setHidden: NO];
 
   _boardView = [[ChessView alloc] initWithFrame: rect];
-
+  
   if(![self loadBoard]) {
-    [[_boardView controller] newGame];
+    [[_boardView controller] newGameWithHumanAs:@"white"];
   }
-
-  [self saveBoard];
-
-  [[_boardView controller] startGame];
 
   [_window setContentView: _boardView]; 
 }
@@ -56,7 +52,6 @@
   [self saveBoard];
 }
 
-
 - (void)dealloc
 {
   [self saveBoard];
@@ -65,64 +60,46 @@
 
 - (BOOL)loadBoard
 {
-  NSString* board_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"tmp" ];
+  NSString* move_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"tmp" ];
   
-  NSFileHandle* board_file = [NSFileHandle fileHandleForReadingAtPath: board_path];
-  NSData* data = [board_file readDataOfLength: 8*8];
+  NSArray* moves = [NSArray arrayWithContentsOfFile: move_path];
+  if([moves count] > 0) {
+    NSLog(@"%d moves in file: %@", [moves count], move_path);
+
+    NSEnumerator* e = [moves objectEnumerator];
+    NSString* move;
+
+    ChessController* c = [_boardView controller];
 
 
-  if([data length] >= 8*8) {
-    NSLog(@"Loading board data from %@\n", board_path);
-    ChessBoard* board = [_boardView board];
-    
-    [board clearPieces];
+    [c startWaiting];
 
-    for(int x=0; x < 8; ++x) {
-      for(int y=0; y < 8; ++y) {
-	char sym = ((char*)[data bytes])[x*8 + y];
-	
-	if(sym != '.') {
-	  NSLog(@"(%d, %d) = %c\n", x,y,sym);
-	  [[board cellAtX: x Y: y]
-	    setPiece: [[ChessPiece alloc]
-			initWithSymbol: sym
-		       ]
-	   ];
-	}
-      }
+    [c newGameWithHumanAs:@"white"];
+    [c startManual];
+
+    NSLog(@"Sending moves\n");
+    while((move = [e nextObject])) {
+      [c sendMove: move];
     }
 
+    // do not disable manual mode or waiting
+    // wait for gnuchess to process all sent moves
+    
     return YES;
+  } else {
+    NSLog(@"No moves in file: %@", move_path);
+    return NO;
   }
-
-  NSLog(@"No board file at %@\n", board_path);
-  return NO;
 }
 
 - (void)saveBoard
 {
-  char board_store[8][8];
-  ChessBoard* board = [_boardView board];
-
-  for(int x=0; x < 8; ++x) {
-    for(int y=0; y < 8; ++y) {
-      ChessCell* cell = [board cellAtX: x Y: y];
-      if([cell piece]) {
-	board_store[x][y] = [[cell piece] symbol];
-      } else {
-	board_store[x][y] = '.';
-      }
-    }
-  }
-
   NSString* board_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"tmp"];
-
   NSLog(@"Saving board data to %@\n", board_path);
 
-  NSFileManager* fm = [NSFileManager defaultManager];
-  [fm createFileAtPath: board_path
-      contents:[NSData dataWithBytesNoCopy: board_store length: sizeof(board_store)]
-      attributes: nil];
+  NSFileHandle* move_file = [NSFileHandle fileHandleForWritingAtPath: board_path];
+  
+  [[[_boardView controller] move_history] writeToFile: board_path atomically: YES];
 }
 
 @end

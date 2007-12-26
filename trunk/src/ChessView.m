@@ -58,13 +58,13 @@
     return self;
 }
 
-- (void)startWaiting
+- (void)startWaiting:(id)unused;
 {
   [thinkbar startAnimation];
 }
 
 
-- (void)stopWaiting
+- (void)stopWaiting:(id)unused;
 {
   [thinkbar stopAnimation];
 }
@@ -77,9 +77,10 @@
   int cellWidth = (int)rect.size.width/8;
   int cellHeight = (int)rect.size.height/8;
 
-  NSLog(@"click at %f x %f in rect (%f, %f)(%f, %f)\n", point.x, point.y,
+  /*  NSLog(@"click at %f x %f in rect (%f, %f)(%f, %f)\n", point.x, point.y,
 	rect.origin.x, rect.origin.y,
 	rect.size.width, rect.size.height);
+  */
 
   int x = (int)(point.x - rect.origin.x) / cellWidth;
   int y = 7 - ((int)(point.y - rect.origin.y) / cellHeight);
@@ -93,18 +94,10 @@
     assert([clicked x] == x && [clicked y] == y);
 
     [controller cellClicked: clicked inView: self];
-  } else {
-    if(x == 0 && y == -2) {
-      exit(1);
-    }
-    
-    [controller cellClicked: nil inView: self];
   }
   
   [self setNeedsDisplay];
 }
-
-
 
 - (void)initColors
 {
@@ -118,20 +111,17 @@
   cell_dark = CGColorCreate(colorSpace, dark);
   cell_select = CGColorCreate(colorSpace, select);
   CGColorSpaceRelease(colorSpace);
-  //CGContextRelease(context);
 }
 
 - (void)drawRect:(CGRect)r 
 {
   NSLog(@"Drawing board...\n");
-
   CGContextRef context = UICurrentContext();
+
   const int cells = 8;
   
   const float width = [board rect].size.width;
   const float height = [board rect].size.height;
-
-  NSLog(@"Drawing chess board in window of %f x %f...\n", width, height);
 
   ChessCell* selected = [controller selected_cell];
 
@@ -154,7 +144,7 @@
     }
   }
 
-  printf("Done drawing board\n");
+  NSLog(@"Drew board\n");
 }
 
 - (ChessBoard *)board
@@ -166,17 +156,5 @@
 {
     return controller;
 }
-
-
-
-- (void)alertSheet:(UIAlertSheet*)sheet buttonClicked:(int)button
-{
-  //  [alert dismiss];
-  //  [alert release];
-  //  [board reset];
-  //  [self setNeedsDisplay];
-}
-
-
 
 @end
