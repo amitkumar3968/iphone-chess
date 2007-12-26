@@ -272,6 +272,8 @@
   for(i=0; i < 8; ++i) {
     [[board cellAtX:i Y:6] setPiece: [[ChessPiece alloc] initWithSymbol: 'p']];
   }
+
+  [view setNeedsDisplay];
 }
 
 - (void)startGame
@@ -356,6 +358,17 @@
     [self movePiece: m];
     [self toggleTurn];
   }
+}
+
+- (void)computerWin:(id)unused
+{
+  [view computerWinAlert];
+}
+
+
+- (void)humanWin:(id)unused
+{
+  [view humanWinAlert];
 }
 
 - (ChessCell*)selected_cell {
