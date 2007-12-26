@@ -17,12 +17,16 @@
     struct CGColor* cell_select; // RGBA: 0,0,0,0
 
     UIProgressIndicator* thinkbar;
+    UIAlertSheet* alert;
 
     CGRect frame;
 
     ChessBoard *board;	
     ChessController *controller;
 }
+
+- (void)computerWinAlert;
+- (void)humanWinAlert;
 
 - (void)mouseDown:(GSEvent *)event;
 
@@ -33,6 +37,8 @@
 
 - (void)initGraphics;
 - (void)initColors;
+
+
 
 - (ChessBoard *)board;
 - (ChessController *)controller;

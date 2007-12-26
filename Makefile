@@ -49,6 +49,7 @@ bundle: Chess
 	tar --exclude '*/.*' -C img/ -c . | tar -C Chess.app -x
 	tar --exclude '*/.*' -c sound/ | tar -C Chess.app -x
 
+
 #	cd Chess.app && curl "$(PGNURL)" | gzip -d | head -n 162447 > book.pgn
 	
 deploy:

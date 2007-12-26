@@ -50,6 +50,10 @@
       [self addSubview: thinkbar];
       [thinkbar setStyle: 5];
 
+
+      alert = [[UIAlertSheet alloc] initWithFrame:CGRectMake(0, 240, 320, 240)];
+      [alert presentSheetFromAboveView: self];
+
       [self initColors];
 
       NSLog(@"Created ChessView\n");
@@ -145,6 +149,29 @@
   }
 
   NSLog(@"Drew board\n");
+}
+
+- (void)computerWinAlert
+{
+  [alert setTitle:@"Computer Wins"];
+  [alert addButtonWithTitle:@":("];
+  [alert setDelegate:self];
+  [alert popupAlertAnimated: YES];
+}
+
+
+- (void)humanWinAlert
+{
+  [alert setTitle:@"You Win"];
+  [alert addButtonWithTitle:@":D"];
+  [alert setDelegate:self];
+  [alert popupAlertAnimated: YES];
+}
+
+- (void)alertSheet:(UIAlertSheet*)sheet buttonClicked:(int)button
+{
+  [sheet dismiss];
+  [controller newGameWithHumanAs:@"white"];
 }
 
 - (ChessBoard *)board

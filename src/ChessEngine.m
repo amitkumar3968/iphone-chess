@@ -44,6 +44,23 @@
 
       return;
     }
+
+    if([line hasPrefix:@"0-1 {computer wins as black}"] ||
+       [line hasPrefix:@"1-0 {computer wins as white}"])
+      {
+	[delegate performSelectorOnMainThread:@selector(computerWin:)
+		  withObject:nil
+		  waitUntilDone:NO];
+      }
+    else if ([line hasPrefix:@"1-0 {computer loses as black}"] ||
+		 [line hasPrefix:@"0-1 {computer loses as white}"])
+      {
+	
+	[delegate performSelectorOnMainThread:@selector(humanWin:)
+		  withObject:nil
+		  waitUntilDone:NO];
+      
+      }
   }
 
   return NO;

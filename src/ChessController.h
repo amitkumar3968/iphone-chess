@@ -66,6 +66,8 @@
 - (void)engineMove:(NSString*)move;
 - (void)illegalMove:(NSString*)move;
 - (void)validMove:(NSString*)move;
+- (void)computerWin:(id)unused;
+- (void)humanWin:(id)unused;
 
 - (void)startManual;
 - (void)stopManual;
