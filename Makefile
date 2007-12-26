@@ -15,6 +15,7 @@ LDFLAGS = -framework CoreFoundation \
 CFLAGS=-Wall -std=c99 -g
 
 IP=10.0.10.131
+IP=10.0.1.10
 IP=10.0.1.3
 
 SRC=src/
@@ -51,7 +52,7 @@ bundle: Chess
 #	cd Chess.app && curl "$(PGNURL)" | gzip -d | head -n 162447 > book.pgn
 	
 deploy:
-	scp -rp Chess.app root@$(IP):/Applications
+	scp -Crp Chess.app root@$(IP):/Applications
 
 zip: bundle
 	zip -9yr Chess.zip Chess.app

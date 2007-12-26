@@ -1,19 +1,21 @@
 
 #import <Foundation/Foundation.h>
-#import "ChessCell.h"
 #import "SubProcess.h"
 
 @interface ChessEngine : NSObject {
   SubProcess* proc;
   id controller;
-  NSString* last_move;
+
   BOOL is_running;
+  BOOL can_think;
+  NSMutableArray* move_history;
 }
 
 -(id)initWithController:(id)c;
--(void)moveFrom:(ChessCell*)f To:(ChessCell*)t;
--(void)handleStreamOutput:(const char*)buf length:(ssize_t)len;
--(void)processLine:(NSArray*)words;
+-(void)sendMove:(NSString*)move;
+-(void)waitForMove:(int)move_num withDelegate:(id)delegate;
+
+-(NSArray*)move_history;
 
 -(void)newGame;
 -(void)go;
@@ -21,11 +23,14 @@
 -(void)moveNow;
 -(void)hint;
 
+-(void)setManual;
 -(void)setDepth:(int)d;
 -(void)setClock:(float)c;
 -(void)setBook:(NSString*)book;
 -(void)setHashsize:(int)h;
 
+
+-(BOOL)canThink;
 
 
 

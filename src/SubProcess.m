@@ -12,15 +12,6 @@
 
 @implementation SubProcess
 
-static SubProcess* instance = nil;
-
-static void signal_handler(int signal) {
-  NSLog(@"Caught signal: %d", signal);
-  [instance dealloc];
-  instance = nil;
-  exit(1);
-}
-
 int start_process(const char* path, char* const args[], char* const env[]) {
   struct stat st;
   if (stat(path, &st) != 0) {
@@ -39,21 +30,12 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   return 0;
 }
 
-- (id)initWithDelegate:(id)inputDelegate
+- (id)init
 {
-  if (instance != nil) {
-    [NSException raise:@"Unsupported" format:@"Only one SubProcess"];
-  }
   self = [super init];
-  instance = self;
+
   wfd = -1;
   rfd = -1;
-
-  delegate = inputDelegate;
-
-  // Clean up when ^C is pressed during debugging from a console
-  signal(SIGINT, &signal_handler);
-  
 
   int old_pid = [self readPidFile];
   if(old_pid) {
@@ -72,11 +54,8 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   pid_t pid = fork();
   if (pid == -1) {
     perror("fork");
-    [self failure:@"[Failed to fork child process]"];
     exit(0);
   } else if (pid == 0) {
-    // First try to use /bin/login since its a little nicer.  Fall back to
-    // /bin/sh  if that is available.
     char* chess_args[] = {"gnuchess", "-x", (char)0};
     char* env[] = { (char*)0 };
 
@@ -101,12 +80,13 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   [self writePidFile];
 
   NSLog(@"Child process id: %d\n", pid);
-  [NSThread detachNewThreadSelector:@selector(startIOThread:)
-	    toTarget:self
-	    withObject:delegate];
 
-  NSLog(@"Yay\n");
-  return self;
+  if(rfd > -1 && wfd > -1 && child_pid) {
+    return self;
+  } else {
+    [self release];
+    return nil;
+  }
 }
 
 - (int)readPidFile
@@ -179,33 +159,56 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   return [self write: [string cString] length:[string length]];
 }
 
-- (void)startIOThread:(id)inputDelegate
+- (NSString*)readLine
 {
-  [[NSAutoreleasePool alloc] init];
-  const int kBufSize = 1024;
-  char buf[kBufSize];
-  ssize_t nread;
-  while (1) {
-    // Blocks until a character is ready
-    nread = read(rfd, buf, kBufSize);
-    // On error, give a tribute to OS X terminal
-    if (nread == -1) {
-      perror("read");
-      [self close];
-      [self failure:@"[Process completed]"];
-      return;
-    } else if (nread == 0) {
-      [self close];
-      [self failure:@"[Process completed]"];
-      return;
+  static NSString* trailing = nil;
+  static NSMutableArray* lines = nil;
+
+  if([lines count] > 0) {
+    NSString* line = [lines objectAtIndex: 0];
+    NSLog(@"line >> %@\n", line);
+    [lines removeObjectAtIndex: 0];
+    return line;
+  } else {
+    if(lines == nil) {
+      lines = [[NSMutableArray alloc] init];
     }
-    [inputDelegate handleStreamOutput:buf length:nread];
+  }
+
+  char buf[1024];
+  int nread = read(rfd, buf, sizeof(buf));
+
+  if(nread > 0) {
+    NSMutableString* data = [[NSMutableString alloc] init];
+    if(trailing) {
+      [data appendString: trailing];
+    }
+
+    [data appendString: [NSString stringWithCString: buf length: nread]];
+
+    NSArray* new_lines = [data componentsSeparatedByString:@"\n"];
+    BOOL has_spare = NO;
+    if([new_lines lastObject] != @"") {
+      has_spare = YES;
+    }
+
+    NSEnumerator* e = [new_lines objectEnumerator];
+    NSString* l;
+    while((l = [e nextObject])) {
+      if(has_spare == YES && l == [new_lines lastObject]) {
+	trailing = [new_lines lastObject];
+      } else {
+	[lines addObject: l];
+      }
+    }
+
+    //    [new_lines release];
+    [data release];
+
+    return [self readLine];
+  } else {
+    [self close];
   }
 }
 
-- (void)failure:(NSString*)message;
-{
-  // HACK: Just pretend the message came from the child
-  [delegate handleStreamOutput:[message cString] length:[message length]];
-}
 @end

@@ -30,6 +30,8 @@
 - (void)setY:(int)newY;
 - (int)y;
 
+- (NSString*)stringCoord;
+
 - (void)setPiece:(ChessPiece*)newPiece;
 - (ChessPiece*)piece;
 - (ChessPiece_View*)piece_view;

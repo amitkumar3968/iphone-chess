@@ -8,6 +8,9 @@
   UIWindow *_window;
 }
 
+-(void)saveBoard;
+-(BOOL)loadBoard;
+
 @end
 
 
