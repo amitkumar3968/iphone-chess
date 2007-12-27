@@ -10,6 +10,53 @@
 #import "ChessPiece_View.h"
 #import "ChessBoard.h"
 
+@implementation ChessNewGameHandler
+- (id)initWithController:(ChessController*)c
+{
+  self = [super init];
+  if(self) {
+    controller = c;
+  }
+  return self;
+}
+
+- (void)alertSheet:(UIAlertSheet*)sheet buttonClicked:(int)button
+{
+  [sheet dismiss];
+
+  if(button == 3) {
+    return;
+  }
+
+  NSString* color = @"white";
+  if(button == 1) {
+    color = @"white";
+  } else if(button == 2) {
+    color = @"black";
+  }
+
+  [controller newGameWithHumanAs:color];
+}
+
+@end
+
+@implementation ChessResultHandler
+- (id)initWithController:(ChessController*)c
+{
+  self = [super init];
+  if(self) {
+    controller = c;
+  }
+  return self;
+}
+
+- (void)alertSheet:(UIAlertSheet*)sheet buttonClicked:(int)button
+{
+  [sheet dismiss];
+  [controller newGameWithHumanAs: [controller humanColorString]];
+}
+@end
+
 @implementation ChessView
 
 - (id)initWithFrame:(CGRect)f
@@ -22,6 +69,7 @@
       UINavigationBar* nav = [[UINavigationBar alloc] initWithFrame: CGRectMake(0.0, 0.0, frame.size.width, 48.0)];
       [nav showButtonsWithLeftTitle:@"New" rightTitle:@"Stats"];
       [nav setBarStyle: 5];
+      [nav setDelegate: self];
       [self addSubview: nav];
 
       frame.size.height -= 48;
@@ -47,12 +95,21 @@
       think_frame.size.width = black_border*0.9;
 
       thinkbar = [[UIProgressIndicator alloc] initWithFrame: think_frame];
-      [self addSubview: thinkbar];
       [thinkbar setStyle: 5];
+      [self addSubview: thinkbar];
 
+      alert_new = [[UIAlertSheet alloc] initWithFrame:CGRectMake(0, 240, 320, 240)];
+      [alert_new presentSheetFromAboveView: self];
+      [alert_new setDelegate: [[ChessNewGameHandler alloc] initWithController: controller]];
+      [alert_new setTitle:@"New Game"];
+      [alert_new setBodyText:@"Choose which side to play as"];
+      [alert_new addButtonWithTitle:@"White"];
+      [alert_new addButtonWithTitle:@"Black"];
+      [alert_new addButtonWithTitle:@"Cancel"];
 
-      alert = [[UIAlertSheet alloc] initWithFrame:CGRectMake(0, 240, 320, 240)];
-      [alert presentSheetFromAboveView: self];
+      alert_result = [[UIAlertSheet alloc] initWithFrame:CGRectMake(0, 240, 320, 240)];
+      [alert_result presentSheetFromAboveView: self];
+      [alert_result setDelegate: [[ChessResultHandler alloc] initWithController: controller]];
 
       [self initColors];
 
@@ -134,14 +191,10 @@
       ChessCell* cell = [board cellAtX:x Y:y];
       CGRect cell_rect = [cell rect];
 
-      if(cell == selected) {
-	CGContextSetFillColorWithColor(context, cell_select);
+      if((x+y) % 2 == 1) {
+	CGContextSetFillColorWithColor(context, cell_light);
       } else {
-	if((x+y) % 2 == 1) {
-	  CGContextSetFillColorWithColor(context, cell_light);
-	} else {
 	  CGContextSetFillColorWithColor(context, cell_dark);
-	}
       }
 
       CGContextFillRect(context, cell_rect);
@@ -153,25 +206,26 @@
 
 - (void)computerWinAlert
 {
-  [alert setTitle:@"Computer Wins"];
-  [alert addButtonWithTitle:@":("];
-  [alert setDelegate:self];
-  [alert popupAlertAnimated: YES];
+  [alert_result setTitle:@"Computer Wins"];
+  [alert_result addButtonWithTitle:@":("];
+  [alert_result popupAlertAnimated: YES];
 }
-
 
 - (void)humanWinAlert
 {
-  [alert setTitle:@"You Win"];
-  [alert addButtonWithTitle:@":D"];
-  [alert setDelegate:self];
-  [alert popupAlertAnimated: YES];
+  [alert_result setTitle:@"You Win"];
+  [alert_result addButtonWithTitle:@":D"];
+  [alert_result popupAlertAnimated: YES];
 }
 
-- (void)alertSheet:(UIAlertSheet*)sheet buttonClicked:(int)button
+
+- (void)navigationBar:(UINavigationBar*)bar buttonClicked:(int)which
 {
-  [sheet dismiss];
-  [controller newGameWithHumanAs:@"white"];
+  if(which == 1) { // left
+    [alert_new popupAlertAnimated:YES];
+  } else if(which == 0) { // right
+    
+  }
 }
 
 - (ChessBoard *)board

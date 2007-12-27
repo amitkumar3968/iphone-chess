@@ -45,6 +45,12 @@
       return;
     }
 
+    if([line hasPrefix: @"1. "]) { // new game started
+      [delegate performSelectorOnMainThread:@selector(validMove:)
+		withObject:[words lastObject]
+		waitUntilDone:NO];
+    }
+
     if([line hasPrefix:@"0-1 {computer wins as black}"] ||
        [line hasPrefix:@"1-0 {computer wins as white}"])
       {
@@ -153,6 +159,16 @@
 -(void)draw
 {
   [proc writeString: @"draw\n"];
+}
+
+-(void)pause
+{
+  [proc pause];
+}
+
+-(void)cont
+{
+  [proc cont];
 }
 
 @end

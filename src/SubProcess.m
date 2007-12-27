@@ -211,4 +211,14 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   }
 }
 
+- (void)pause
+{
+  kill(child_pid, 17);}
+
+
+- (void)cont
+{
+  kill(child_pid, 19);
+}
+
 @end

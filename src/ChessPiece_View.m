@@ -44,6 +44,12 @@
   }
 }
 
+
+- (void)_movedToFront
+{
+
+}
+
 -(ChessPiece*)piece {
   return piece;
 }

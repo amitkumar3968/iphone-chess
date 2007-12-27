@@ -21,6 +21,9 @@
 - (int)readPidFile;
 - (void)writePidFile;
 
+- (void)pause;
+- (void)cont;
+
 - (int)write:(const char*)c length:(unsigned int)len; 
 - (int)writeString:(NSString*)string;
 - (NSString*)readLine;
