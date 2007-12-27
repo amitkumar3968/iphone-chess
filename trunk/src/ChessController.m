@@ -104,7 +104,7 @@
   NSLog(@"engineThread started\n");
 
   while(1) {
-    [engine waitForMove: turn_num withDelegate: self];
+    [engine waitForMove: &turn_num withDelegate: self];
   }
 }
 
@@ -145,6 +145,10 @@
 
 - (void)selectCell:(ChessCell*)cell
 {
+  if(cell != nil ) {
+    [audio playSelectCell];
+  }
+
   selected_cell = cell;
 
   if(cell == nil) {

@@ -15,10 +15,12 @@
   [_window _setHidden: NO];
 
   _boardView = [[ChessView alloc] initWithFrame: rect];
-  
+  NSLog(@"Checking saved boards...\n");
   if(![self loadBoard]) {
     [[_boardView controller] newGameWithHumanAs:@"white"];
   }
+
+  [self saveBoard];
 
   [_window setContentView: _boardView]; 
 }
@@ -39,7 +41,6 @@
 
 - (void)applicationResume:(GSEvent*)event
 {
-  [self loadBoard];
   [[[_boardView controller] engine] cont];
 }
 
@@ -63,10 +64,15 @@
 
 - (BOOL)loadBoard
 {
-  NSString* move_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"tmp" ];
-  
-  NSArray* moves = [NSArray arrayWithContentsOfFile: move_path];
-  if([moves count] > 0) {
+  NSString* move_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"plist" ];  
+  NSArray* game = [NSArray arrayWithContentsOfFile: move_path];
+
+  NSLog(@"Loaded array from %@. Has %d items\n", move_path, [game count]);
+
+  if([game count] == 2) {
+    NSArray* moves = [game objectAtIndex: 0];
+    NSString* human = [game objectAtIndex: 1];
+
     NSLog(@"%d moves in file: %@", [moves count], move_path);
 
     NSEnumerator* e = [moves objectEnumerator];
@@ -74,10 +80,9 @@
 
     ChessController* c = [_boardView controller];
 
-
     [c startWaiting];
 
-    [c newGameWithHumanAs:@"white"];
+    [c newGameWithHumanAs:human];
     [c startManual];
 
     NSLog(@"Sending moves\n");
@@ -97,12 +102,20 @@
 
 - (void)saveBoard
 {
-  NSString* board_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"tmp"];
+  NSString* board_path = [[NSBundle mainBundle] pathForResource:@"board" ofType:@"plist"];
   NSLog(@"Saving board data to %@\n", board_path);
 
-  NSFileHandle* move_file = [NSFileHandle fileHandleForWritingAtPath: board_path];
-  
-  [[[_boardView controller] move_history] writeToFile: board_path atomically: YES];
+  ChessController* c = [_boardView controller];
+
+  NSMutableArray* game = [[NSMutableArray alloc] init];
+  [game addObject: [c move_history]];
+  [game addObject: [c humanColorString]];
+
+  NSLog(@"data: %@\n", [game description]);
+
+  [game writeToFile: board_path atomically: YES];
+
+  [game release];
 }
 
 @end
