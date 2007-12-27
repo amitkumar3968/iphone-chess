@@ -33,68 +33,73 @@ int start_process(const char* path, char* const args[], char* const env[]) {
 - (id)init
 {
   self = [super init];
+  if(self) {
+    wfd = -1;
+    rfd = -1;
+    
+    int old_pid = [self readPidFile];
+    if(old_pid > 0) {
+      NSLog(@"Killing old gnuchess: %d\n", old_pid);
+      kill(old_pid, 9);
+    }
+    
+    int read_pipe[2];
+    int write_pipe[2];
+    
+    NSLog(@"making pipes...\n");
+    if(pipe(read_pipe) < 0 || pipe(write_pipe) < 0) {
+      NSLog(@"Failed to create IPC pipes: %s\n", strerror(errno));
+      exit(0);
+    }
 
-  wfd = -1;
-  rfd = -1;
-
-  int old_pid = [self readPidFile];
-  if(old_pid) {
-    NSLog(@"Killing old gnuchess: %d\n", old_pid);
-    kill(old_pid, 9);
+    NSLog(@"forking...\n");
+    
+    pid_t pid = fork();
+    if (pid == -1) {
+      perror("fork");
+      exit(0);
+    } else if (pid == 0) {
+      char* chess_args[] = {"gnuchess", "-x", (char)0};
+      char* env[] = { (char*)0 };
+      
+      dup2(write_pipe[0], 0); close(write_pipe[0]);
+      dup2(read_pipe[1], 1); close(read_pipe[1]);
+      
+      rfd = 0;
+      wfd = 1;
+      
+      start_process("/Applications/Chess.app/gnuchess", chess_args, env);
+      exit(0);
+    }
+    
+    close(read_pipe[1]);
+    close(write_pipe[0]);
+    
+    rfd = read_pipe[0];
+    wfd = write_pipe[1];
+    
+    child_pid = pid;
+    
+    [self writePidFile];
+    
+    NSLog(@"Child process id: %d\n", pid);
   }
 
-  int read_pipe[2];
-  int write_pipe[2];
-
-  if(pipe(read_pipe) < 0 || pipe(write_pipe) < 0) {
-    NSLog(@"Failed to create IPC pipes: %s\n", strerror(errno));
-    exit(0);
-  }
-
-  pid_t pid = fork();
-  if (pid == -1) {
-    perror("fork");
-    exit(0);
-  } else if (pid == 0) {
-    char* chess_args[] = {"gnuchess", "-x", (char)0};
-    char* env[] = { (char*)0 };
-
-    dup2(write_pipe[0], 0); close(write_pipe[0]);
-    dup2(read_pipe[1], 1); close(read_pipe[1]);
-
-    rfd = 0;
-    wfd = 1;
-
-    start_process("/Applications/Chess.app/gnuchess", chess_args, env);
-    exit(0);
-  }
-
-  close(read_pipe[1]);
-  close(write_pipe[0]);
-
-  rfd = read_pipe[0];
-  wfd = write_pipe[1];
-
-  child_pid = pid;
-
-  [self writePidFile];
-
-  NSLog(@"Child process id: %d\n", pid);
-
-  if(rfd > -1 && wfd > -1 && child_pid) {
-    return self;
-  } else {
-    [self release];
-    return nil;
-  }
+  return self;
 }
 
 - (int)readPidFile
 {
   NSString* pidpath = [[NSBundle mainBundle] pathForResource:@"gnuchess" ofType:@"pid"];
   NSFileHandle* pf = [NSFileHandle fileHandleForReadingAtPath: pidpath];
+
+  NSLog(@"Reading gnuchess pid from %@\n", pidpath);
   
-  int p = ((int*)[[pf readDataOfLength: sizeof(int)] bytes])[0];
+  NSData* pd = [pf readDataOfLength: sizeof(int)];
+  int p = -1;
+  if([pd length] == sizeof(int)) {
+    p = *((int*)[pd bytes]);
+  }
 
   [pf closeFile];
   
@@ -176,7 +181,8 @@ int start_process(const char* path, char* const args[], char* const env[]) {
   }
 
   char buf[1024];
-  int nread = read(rfd, buf, sizeof(buf));
+  int nread = read(rfd, buf, sizeof(buf)-1);
+  buf[nread]=0;
 
   if(nread > 0) {
     NSMutableString* data = [[NSMutableString alloc] init];
@@ -184,7 +190,7 @@ int start_process(const char* path, char* const args[], char* const env[]) {
       [data appendString: trailing];
     }
 
-    [data appendString: [NSString stringWithCString: buf length: nread]];
+    [data appendString: [NSString stringWithCString: buf encoding: NSASCIIStringEncoding]];
 
     NSArray* new_lines = [data componentsSeparatedByString:@"\n"];
     BOOL has_spare = NO;
@@ -213,7 +219,8 @@ int start_process(const char* path, char* const args[], char* const env[]) {
 
 - (void)pause
 {
-  kill(child_pid, 17);}
+  kill(child_pid, 17);
+}
 
 
 - (void)cont

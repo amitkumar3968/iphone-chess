@@ -13,7 +13,7 @@
 
 -(id)initWithController:(id)c;
 -(void)sendMove:(NSString*)move;
--(void)waitForMove:(int)move_num withDelegate:(id)delegate;
+-(void)waitForMove:(int*)move_num withDelegate:(id)delegate;
 
 -(NSArray*)move_history;
 

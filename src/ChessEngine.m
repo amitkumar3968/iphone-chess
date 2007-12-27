@@ -5,12 +5,19 @@
 
 -(id)initWithController:(id)c;
 {
-  NSLog(@"Launching chess engine...\n");
-  controller = c;
-  proc = [[SubProcess alloc] init];
+  self = [super init];
 
-  is_running = NO;
-  can_think = NO;
+  if(self) {
+    NSLog(@"Launching chess engine...\n");
+    controller = c;
+    move_history = [[NSMutableArray alloc] init];
+    proc = [[SubProcess alloc] init];
+    NSLog(@"gnuchess started\n");
+    is_running = NO;
+    can_think = NO;
+  } 
+
+  return self;
 }
 
 -(void)sendMove:(NSString*)move
@@ -21,12 +28,13 @@
   [proc writeString: @"\n"];
 }
 
--(void)waitForMove:(int)move_num withDelegate:(id)delegate
+-(void)waitForMove:(int*)move_num withDelegate:(id)delegate
 {
+  NSAutoreleasePool * pool = [[NSAutoreleasePool alloc ]init ];
+  
   NSString* line;
-  NSString* move_prefix = [NSString stringWithFormat:@"%d. ", move_num];
 
-  NSLog(@"Waiting for move (%d) from gnuchess...\n", move_num);
+  NSLog(@"Waiting for move (%d) from gnuchess...\n", *move_num);
   while((line = [proc readLine])) {
     NSArray* words = [line componentsSeparatedByString:@" "];
 
@@ -36,19 +44,22 @@
 		waitUntilDone:NO];
       return;
     }
+    
+    NSRange dec_range = [line rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+    NSRange dot_range = [line rangeOfCharacterFromSet:[NSCharacterSet punctuationCharacterSet]];
 
-    if([line hasPrefix: move_prefix]) {
-      [delegate performSelectorOnMainThread:@selector(validMove:)
-		withObject:[words lastObject]
-		waitUntilDone:NO];
-
-      return;
-    }
-
-    if([line hasPrefix: @"1. "]) { // new game started
-      [delegate performSelectorOnMainThread:@selector(validMove:)
-		withObject:[words lastObject]
-		waitUntilDone:NO];
+    if(dec_range.location == 0 &&
+       dot_range.location != NSNotFound) {
+      NSString* decimals = [line substringToIndex: dot_range.location];
+      int lmn = [decimals intValue];
+      
+      if(lmn >= *move_num || lmn == 1) {
+	[move_history addObject: [words lastObject]];
+	[delegate performSelectorOnMainThread:@selector(validMove:)
+		  withObject:[words lastObject]
+		  waitUntilDone:NO];
+	return;
+      }
     }
 
     if([line hasPrefix:@"0-1 {computer wins as black}"] ||
@@ -57,6 +68,7 @@
 	[delegate performSelectorOnMainThread:@selector(computerWin:)
 		  withObject:nil
 		  waitUntilDone:NO];
+	return;
       }
     else if ([line hasPrefix:@"1-0 {computer loses as black}"] ||
 		 [line hasPrefix:@"0-1 {computer loses as white}"])
@@ -65,11 +77,11 @@
 	[delegate performSelectorOnMainThread:@selector(humanWin:)
 		  withObject:nil
 		  waitUntilDone:NO];
-      
+      	return;
       }
   }
 
-  return NO;
+  [pool release];
 }
 
 
@@ -169,6 +181,12 @@
 -(void)cont
 {
   [proc cont];
+}
+
+-(void)dealloc
+{
+  [self quit];
+  [super dealloc];
 }
 
 @end

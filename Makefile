@@ -14,8 +14,9 @@ LDFLAGS = -framework CoreFoundation \
 
 CFLAGS=-Wall -std=c99 -g
 
-IP=10.0.10.131
+
 IP=10.0.1.10
+IP=10.0.10.113
 IP=10.0.1.3
 
 SRC=src/
@@ -39,15 +40,15 @@ bundle: Chess
 	mkdir -p Chess.app/pieces
 	mkdir -p Chess.app/sound
 
-	echo -n > Chess.app/gnuchess.pid
-	echo -n > Chess.app/board.tmp
+	touch Chess.app/gnuchess.pid
+	touch Chess.app/board.plist
 
 	cp Chess Chess.app
 	cp $(CHESS)/src/gnuchess Chess.app
 	cp Info.plist Chess.app
 
 	tar --exclude '*/.*' -C img/ -c . | tar -C Chess.app -x
-	tar --exclude '*/.*' -c sound/ | tar -C Chess.app -x
+	tar --exclude '*/.*' -C sound/ -c . | tar -C Chess.app -x
 
 
 #	cd Chess.app && curl "$(PGNURL)" | gzip -d | head -n 162447 > book.pgn
