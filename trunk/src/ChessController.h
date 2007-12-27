@@ -31,11 +31,14 @@
   ChessAudio* audio;
   ChessBoard* board;
   ChessCell* selected_cell;
-  UIView* view;
+  UIImageView* glow;
 
+
+  UIView* view;
 
   BOOL waiting;
   ChessEngine* engine;
+  BOOL engine_thread_should_stop;
 
   NSString* turn_color; // whose turn is it?
   NSString* player_color;
@@ -48,10 +51,17 @@
   NSMutableArray* black_taken; // pieces taken which are black
 }
 
+- (id)initWithBoard:(ChessBoard*)b inView:(UIView*)v;
+- (void)engineThread:(id)unused;
+
 - (void)startGame;
 - (void)newGameWithHumanAs:(NSString*)color;
-- (id)initWithBoard:(ChessBoard*)b inView:(UIView*)v;
+- (NSString*)humanColorString;
+- (NSString*)computerColorString;
+
 - (void)cellClicked:(ChessCell*)cell inView:(UIView*)view;
+- (void)selectCell:(ChessCell*)cell;
+- (void)sendMove:(NSString*)move;
 
 - (void)movePiece:(ChessMove*)move;
 
@@ -59,13 +69,10 @@
 - (BOOL)isComputerTurn;
 - (BOOL)isHumanTurn;
 
-- (void)engineThread:(id)unused;
-
-- (void)sendMove:(NSString*)move;
-
 - (void)engineMove:(NSString*)move;
 - (void)illegalMove:(NSString*)move;
 - (void)validMove:(NSString*)move;
+
 - (void)computerWin:(id)unused;
 - (void)humanWin:(id)unused;
 

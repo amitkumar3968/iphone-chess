@@ -40,16 +40,19 @@
 - (void)applicationResume:(GSEvent*)event
 {
   [self loadBoard];
+  [[[_boardView controller] engine] cont];
 }
 
 - (void)applicationWillTerminate:(GSEvent*)event
 {
   [self saveBoard];
+  [[[_boardView controller] engine] pause];
 }
 
 - (void)applicationSuspend:(GSEvent*)event
 {
   [self saveBoard];
+  [[[_boardView controller] engine] pause];
 }
 
 - (void)dealloc

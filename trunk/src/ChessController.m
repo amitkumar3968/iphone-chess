@@ -82,13 +82,16 @@
       engine = [[ChessEngine alloc] initWithController: self];
       audio = [[ChessAudio alloc] init];
 
+      UIImage* glow_image = [UIImage applicationImageNamed: @"pieceglow.png"];
+      if(glow_image) {
+	glow = [[UIImageView alloc] initWithImage: glow_image];
+      }
 
       NSLog(@"starting engine thread\n");
       [NSThread detachNewThreadSelector:@selector(engineThread:)
 		toTarget: self
 		withObject:nil
        ];
-
     }
   }
 
@@ -102,7 +105,6 @@
 
   while(1) {
     [engine waitForMove: turn_num withDelegate: self];
-    NSLog(@"got a move: turn_num = %d\n", turn_num);
   }
 }
 
@@ -113,13 +115,13 @@
   }
 
   if(cell == selected_cell) {  // toggle cell selection
-    selected_cell = nil;
+    [self selectCell: nil];
     return;
   } else if(selected_cell == nil || cell == nil) { // select new cell or deselect is cell is nil
     ChessPiece* p = [cell piece];
     if(p != nil) {
       if([p isColor: player_color]) {
-	selected_cell = cell;
+	[self selectCell: cell];
       }
     }
   } else { // otherwise we are moving the piece from our selected cell to a new spot
@@ -128,7 +130,7 @@
     
     if(selected_piece && new_piece) {
       if([selected_piece isWhite] == [new_piece isWhite]) {
-	selected_cell = cell; // switch to that piece
+	[self selectCell: cell];
 	return;
       }
     }
@@ -139,6 +141,29 @@
   }
 
   NSLog(@"Click over\n");
+}
+
+- (void)selectCell:(ChessCell*)cell
+{
+  selected_cell = cell;
+
+  if(cell == nil) {
+    [glow removeFromSuperview];
+  } else {
+    CGRect cr = [cell rect];
+    CGRect glow_frame = cr;
+    glow_frame.size.height = 204.0;
+    glow_frame.size.width = 204.0;
+    glow_frame.origin.x -= (102 - (cr.size.width / 2));
+    glow_frame.origin.y -= (102 - (cr.size.height / 2));
+
+    [glow setFrame: glow_frame];
+    [view addSubview: glow];
+    [view bringSubviewToFront: glow];
+    [view bringSubviewToFront: [[cell piece_view] image_view]];
+  }
+
+  [view setNeedsDisplay];
 }
 
 - (void)movePiece:(ChessMove*)m
@@ -177,7 +202,8 @@
   
   [to setPiece: [from piece]];
   [from setPiece: nil];
-  selected_cell = nil;
+  [self selectCell: nil];
+
   NSLog(@"piece moved\n");
 }
 
@@ -201,8 +227,7 @@
     if([self isComputerTurn] == YES) { // computer is to play
       NSLog(@"engine is to play\n");
 
-      selected_cell = nil;
-      [view setNeedsDisplay];
+      [self selectCell: nil];
 
       if([engine canThink] == NO) { // computer is not thinking
 	NSLog(@"engine is not thinking\n");
@@ -228,6 +253,9 @@
   [engine newGame];
   [board clearPieces];
 
+
+  [self selectCell: nil];
+
   turn_num = 1;
   moves_sent = 0;
   moves_recv = 0;
@@ -239,6 +267,13 @@
   }
   player_color = color;
   [color retain];
+
+  NSLog(@"Human is playing as %@\n", player_color);
+
+  if([self isComputerTurn]) {
+    [self startWaiting];
+    [engine go]; // force engine to take first move
+  }
 
   NSLog(@"Placing initial board pieces...\n");
 
@@ -297,6 +332,15 @@
   return NO;
 }
 
+- (NSString*)humanColorString 
+{
+  return player_color;
+}
+
+- (NSString*)computerColorString
+{
+  return [player_color isEqualToString:@"white"] ? @"black" : @"white";
+}
 
 - (void)startManual
 {

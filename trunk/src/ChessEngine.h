@@ -32,8 +32,8 @@
 
 -(BOOL)canThink;
 
-
-
+-(void)pause;
+-(void)cont;
 
 @end
 
