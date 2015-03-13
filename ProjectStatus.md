@@ -1,0 +1,3 @@
+Seems to be mostly playable, I need to add some features such as en passant pawn taking and piece exchange.
+
+I think the general game mechanics should work fairly reliably, although I think castling may cause some crazy stuff to happen at times, keep an eye out :) I'd love to get any feedback about this, it's my first Obj-C app, let alone for the iPhone. E-mail me at alex.stapleton@gmail.com with any questions, complaints, patches etc ;)
